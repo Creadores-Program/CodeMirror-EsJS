@@ -20,10 +20,10 @@
   
       return {
         "si": kw("si"), "mientras": A, "con": A, "sino": B, "hacer": B, "intentar": B, "finalmente": B,
-        "retornar": D, "romper": D, "continuar": D, "crear": kw("crear"), "eliminar": C, "vacio": C, "lanzar": C,
+        "retornar": D, "romper": D, "continuar": D, "crear": kw("new"), "eliminar": C, "vacio": C, "lanzar": C,
         "depurador": kw("depurador"), "var": kw("var"), "const": kw("var"), "mut": kw("var"),
-        "funcion": kw("funcion"), "capturar": kw("capturar"),
-        "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("porDefecto"),
+        "funcion": kw("function"), "capturar": kw("catch"),
+        "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("default"),
         "en": operator, "tipoDe": operator, "instanciaDe": operator,
         "verdadero": atom, "falso": atom, "nulo": atom, "indefinido": atom, "NuN": atom, "Infinito": atom,
         "ambiente": kw("ambiente"), "clase": kw("clase"), "super": kw("atom"),
@@ -119,7 +119,7 @@
             return ret(kw.type, kw.style, word)
           }
           if (word == "asincrono" && stream.match(/^(\s|\/\*([^*]|\*(?!\/))*?\*\/)*[\[\(\w]/, false))
-            return ret("asincrono", "keyword", word)
+            return ret("async", "keyword", word)
         }
         return ret("variable", "variable", word)
       }
@@ -312,7 +312,7 @@
     function Context(prev, vars, block) { this.prev = prev; this.vars = vars; this.block = block }
     function Var(name, next) { this.name = name; this.next = next }
   
-    var defaultVars = new Var("this", new Var("arguments", null))
+    var defaultVars = new Var("ambiente", new Var("arguments", null))
     function pushcontext() {
       cx.state.context = new Context(cx.state.context, cx.state.localVars, false)
       cx.state.localVars = defaultVars
@@ -362,19 +362,19 @@
       if (type == "keyword a") return cont(pushlex("form"), parenExpr, statement, poplex);
       if (type == "keyword b") return cont(pushlex("form"), statement, poplex);
       if (type == "keyword d") return cx.stream.match(/^\s*$/, false) ? cont() : cont(pushlex("stat"), maybeexpression, expect(";"), poplex);
-      if (type == "debugger") return cont(expect(";"));
+      if (type == "depuradora") return cont(expect(";"));
       if (type == "{") return cont(pushlex("}"), pushblockcontext, block, poplex, popcontext);
       if (type == ";") return cont();
-      if (type == "if") {
-        if (cx.state.lexical.info == "else" && cx.state.cc[cx.state.cc.length - 1] == poplex)
+      if (type == "si") {
+        if (cx.state.lexical.info == "sino" && cx.state.cc[cx.state.cc.length - 1] == poplex)
           cx.state.cc.pop()();
         return cont(pushlex("form"), parenExpr, statement, poplex, maybeelse);
       }
-      if (type == "function") return cont(functiondef);
-      if (type == "for") return cont(pushlex("form"), pushblockcontext, forspec, statement, popcontext, poplex);
-      if (type == "class" || (isTS && value == "interface")) {
+      if (type == "funcion") return cont(functiondef);
+      if (type == "para") return cont(pushlex("form"), pushblockcontext, forspec, statement, popcontext, poplex);
+      if (type == "clase" || (isTS && value == "interface")) {
         cx.marked = "keyword"
-        return cont(pushlex("form", type == "class" ? type : value), className, poplex)
+        return cont(pushlex("form", type == "clase" ? type : value), className, poplex)
       }
       if (type == "variable") {
         if (isTS && value == "declare") {
@@ -395,14 +395,14 @@
           return cont(pushlex("stat"), maybelabel);
         }
       }
-      if (type == "switch") return cont(pushlex("form"), parenExpr, expect("{"), pushlex("}", "switch"), pushblockcontext,
+      if (type == "elegir") return cont(pushlex("form"), parenExpr, expect("{"), pushlex("}", "switch"), pushblockcontext,
                                         block, poplex, poplex, popcontext);
-      if (type == "case") return cont(expression, expect(":"));
-      if (type == "default") return cont(expect(":"));
-      if (type == "catch") return cont(pushlex("form"), pushcontext, maybeCatchBinding, statement, poplex, popcontext);
-      if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
-      if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
-      if (type == "async") return cont(statement)
+      if (type == "caso") return cont(expression, expect(":"));
+      if (type == "porDefecto") return cont(expect(":"));
+      if (type == "capturar") return cont(pushlex("form"), pushcontext, maybeCatchBinding, statement, poplex, popcontext);
+      if (type == "exportar") return cont(pushlex("stat"), afterExport, poplex);
+      if (type == "importar") return cont(pushlex("stat"), afterImport, poplex);
+      if (type == "asincrono") return cont(statement)
       if (value == "@") return cont(expression, statement)
       return pass(pushlex("stat"), expression, expect(";"), poplex);
     }
@@ -428,15 +428,15 @@
   
       var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
       if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
-      if (type == "function") return cont(functiondef, maybeop);
-      if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
+      if (type == "funcion") return cont(functiondef, maybeop);
+      if (type == "clase" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
       if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
       if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
       if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
       if (type == "[") return cont(pushlex("]"), arrayLiteral, poplex, maybeop);
       if (type == "{") return contCommasep(objprop, "}", null, maybeop);
       if (type == "quasi") return pass(quasi, maybeop);
-      if (type == "new") return cont(maybeTarget(noComma));
+      if (type == "crear") return cont(maybeTarget(noComma));
       return cont();
     }
     function maybeexpression(type) {
@@ -512,7 +512,7 @@
       if (type == "variable") {cx.marked = "property"; return cont();}
     }
     function objprop(type, value) {
-      if (type == "async") {
+      if (type == "asincrono") {
         cx.marked = "property";
         return cont(objprop);
       } else if (type == "variable" || cx.style == "keyword") {
@@ -600,9 +600,9 @@
       }
     }
     function typeexpr(type, value) {
-      if (value == "keyof" || value == "typeof" || value == "infer" || value == "readonly") {
+      if (value == "keyof" || value == "tipoDe" || value == "infer" || value == "readonly") {
         cx.marked = "keyword"
-        return cont(value == "typeof" ? expressionNoComma : typeexpr)
+        return cont(value == "tipoDe" ? expressionNoComma : typeexpr)
       }
       if (type == "variable" || value == "void") {
         cx.marked = "type"
@@ -662,7 +662,7 @@
       if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
       if (value == "|" || type == "." || value == "&") return cont(typeexpr)
       if (type == "[") return cont(typeexpr, expect("]"), afterType)
-      if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
+      if (value == "extiende" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
       if (value == "?") return cont(typeexpr, expect(":"), typeexpr)
     }
     function maybeTypeArgs(_, value) {
@@ -706,10 +706,10 @@
       if (type == ",") return cont(vardef);
     }
     function maybeelse(type, value) {
-      if (type == "keyword b" && value == "else") return cont(pushlex("form", "else"), statement, poplex);
+      if (type == "keyword b" && value == "sino") return cont(pushlex("form", "sino"), statement, poplex);
     }
     function forspec(type, value) {
-      if (value == "await") return cont(forspec);
+      if (value == "esperar") return cont(forspec);
       if (type == "(") return cont(pushlex(")"), forspec1, poplex);
     }
     function forspec1(type) {
@@ -720,7 +720,7 @@
     function forspec2(type, value) {
       if (type == ")") return cont()
       if (type == ";") return cont(forspec2)
-      if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression, forspec2) }
+      if (value == "en" || value == "de") { cx.marked = "keyword"; return cont(expression, forspec2) }
       return pass(expression, forspec2)
     }
     function functiondef(type, value) {
@@ -747,7 +747,7 @@
       if (value == "@") cont(expression, funarg)
       if (type == "spread") return cont(funarg);
       if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
-      if (isTS && type == "this") return cont(maybetype, maybeAssign)
+      if (isTS && type == "ambiente") return cont(maybetype, maybeAssign)
       return pass(pattern, maybetype, maybeAssign);
     }
     function classExpression(type, value) {
@@ -760,14 +760,14 @@
     }
     function classNameAfter(type, value) {
       if (value == "<") return cont(pushlex(">"), commasep(typeparam, ">"), poplex, classNameAfter)
-      if (value == "extends" || value == "implements" || (isTS && type == ",")) {
+      if (value == "extiende" || value == "implements" || (isTS && type == ",")) {
         if (value == "implements") cx.marked = "keyword";
         return cont(isTS ? typeexpr : expression, classNameAfter);
       }
       if (type == "{") return cont(pushlex("}"), classBody, poplex);
     }
     function classBody(type, value) {
-      if (type == "async" ||
+      if (type == "asincrono" ||
           (type == "variable" &&
            (value == "static" || value == "get" || value == "set" || (isTS && isModifier(value))) &&
            cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false))) {
@@ -800,7 +800,7 @@
     }
     function afterExport(type, value) {
       if (value == "*") { cx.marked = "keyword"; return cont(maybeFrom, expect(";")); }
-      if (value == "default") { cx.marked = "keyword"; return cont(expression, expect(";")); }
+      if (value == "porDefecto") { cx.marked = "keyword"; return cont(expression, expect(";")); }
       if (type == "{") return cont(commasep(exportField, "}"), maybeFrom, expect(";"));
       return pass(statement);
     }
@@ -827,7 +827,7 @@
       if (value == "as") { cx.marked = "keyword"; return cont(importSpec); }
     }
     function maybeFrom(_type, value) {
-      if (value == "from") { cx.marked = "keyword"; return cont(expression); }
+      if (value == "desde") { cx.marked = "keyword"; return cont(expression); }
     }
     function arrayLiteral(type) {
       if (type == "]") return cont();
@@ -848,7 +848,7 @@
   
     function expressionAllowed(stream, state, backUp) {
       return state.tokenize == tokenBase &&
-        /^(?:operator|sof|keyword [bcd]|case|new|export|default|spread|[\[{}\(,;:]|=>)$/.test(state.lastType) ||
+        /^(?:operator|sof|keyword [bcd]|caso|crear|exportar|porDefecto|spread|[\[{}\(,;:]|=>)$/.test(state.lastType) ||
         (state.lastType == "quasi" && /\{\s*$/.test(stream.string.slice(0, stream.pos - (backUp || 0))))
     }
   
@@ -889,7 +889,7 @@
         if (state.tokenize != tokenBase) return 0;
         var firstChar = textAfter && textAfter.charAt(0), lexical = state.lexical, top
         // Kludge to prevent 'maybelse' from blocking lexical scope pops
-        if (!/^\s*else\b/.test(textAfter)) for (var i = state.cc.length - 1; i >= 0; --i) {
+        if (!/^\s*sino\b/.test(textAfter)) for (var i = state.cc.length - 1; i >= 0; --i) {
           var c = state.cc[i];
           if (c == poplex) lexical = lexical.prev;
           else if (c != maybeelse && c != popcontext) break;
@@ -908,13 +908,13 @@
         else if (type == "form") return lexical.indented + indentUnit;
         else if (type == "stat")
           return lexical.indented + (isContinuedStatement(state, textAfter) ? statementIndent || indentUnit : 0);
-        else if (lexical.info == "switch" && !closing && parserConfig.doubleIndentSwitch != false)
-          return lexical.indented + (/^(?:case|default)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
+        else if (lexical.info == "elegir" && !closing && parserConfig.doubleIndentSwitch != false)
+          return lexical.indented + (/^(?:caso|porDefecto)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
         else if (lexical.align) return lexical.column + (closing ? 0 : 1);
         else return lexical.indented + (closing ? 0 : indentUnit);
       },
   
-      electricInput: /^\s*(?:case .*?:|default:|\{|\})$/,
+      electricInput: /^\s*(?:caso .*?:|porDefecto:|\{|\})$/,
       blockCommentStart: jsonMode ? null : "/*",
       blockCommentEnd: jsonMode ? null : "*/",
       blockCommentContinue: jsonMode ? null : " * ",
