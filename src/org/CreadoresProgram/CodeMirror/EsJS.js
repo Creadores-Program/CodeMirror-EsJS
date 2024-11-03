@@ -606,7 +606,7 @@
         cx.marked = "keyword"
         return cont(value == "tipoDe" ? expressionNoComma : typeexpr)
       }
-      if (type == "variable" || value == "void") {
+      if (type == "variable" || value == "vacio") {
         cx.marked = "type"
         return cont(afterType)
       }
