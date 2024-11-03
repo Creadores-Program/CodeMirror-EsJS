@@ -22,8 +22,8 @@
         "si": kw("si"), "mientras": A, "con": A, "sino": B, "hacer": B, "intentar": B, "finalmente": B,
         "retornar": D, "romper": D, "continuar": D, "crear": kw("new"), "eliminar": C, "vacio": C, "lanzar": C,
         "depurador": kw("depurador"), "var": kw("var"), "const": kw("var"), "mut": kw("var"),
-        "funcion": kw("function"), "capturar": kw("catch"),
-        "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("default"),
+        "funcion": kw("funcion"), "capturar": kw("capturar"),
+        "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("porDefecto"),
         "en": operator, "tipoDe": operator, "instanciaDe": operator,
         "verdadero": atom, "falso": atom, "nulo": atom, "indefinido": atom, "NuN": atom, "Infinito": atom,
         "ambiente": kw("ambiente"), "clase": kw("clase"), "super": kw("atom"),
@@ -119,7 +119,7 @@
             return ret(kw.type, kw.style, word)
           }
           if (word == "asincrono" && stream.match(/^(\s|\/\*([^*]|\*(?!\/))*?\*\/)*[\[\(\w]/, false))
-            return ret("async", "keyword", word)
+            return ret("asincrono", "keyword", word)
         }
         return ret("variable", "variable", word)
       }
@@ -395,7 +395,7 @@
           return cont(pushlex("stat"), maybelabel);
         }
       }
-      if (type == "elegir") return cont(pushlex("form"), parenExpr, expect("{"), pushlex("}", "switch"), pushblockcontext,
+      if (type == "elegir") return cont(pushlex("form"), parenExpr, expect("{"), pushlex("}", "elegir"), pushblockcontext,
                                         block, poplex, poplex, popcontext);
       if (type == "caso") return cont(expression, expect(":"));
       if (type == "porDefecto") return cont(expect(":"));
@@ -430,7 +430,7 @@
       if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
       if (type == "funcion") return cont(functiondef, maybeop);
       if (type == "clase" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
-      if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
+      if (type == "keyword c" || type == "asincrono") return cont(noComma ? expressionNoComma : expression);
       if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
       if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
       if (type == "[") return cont(pushlex("]"), arrayLiteral, poplex, maybeop);
@@ -922,7 +922,7 @@
       fold: "brace",
       closeBrackets: "()[]{}''\"\"``",
   
-      helperType: jsonMode ? "json" : "javascript",
+      helperType: jsonMode ? "json" : "esjs",
       jsonldMode: jsonldMode,
       jsonMode: jsonMode,
   
