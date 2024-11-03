@@ -1,5 +1,7 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/5/LICENSE
+// Basado en JavaScript de CodeMirror
+// Creadores Program © 2024
   "use strict";
   
   CodeMirror.defineMode("esjs", function(config, parserConfig) {
