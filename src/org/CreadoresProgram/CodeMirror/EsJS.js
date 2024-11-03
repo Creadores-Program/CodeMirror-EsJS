@@ -19,15 +19,15 @@
       var operator = kw("operator"), atom = {type: "atom", style: "atom"};
   
       return {
-        "si": kw("if"), "mientras": A, "con": A, "sino": B, "hacer": B, "intentar": B, "finalmente": B,
-        "retornar": D, "romper": D, "continuar": D, "crear": kw("new"), "eliminar": C, "vacio": C, "lanzar": C,
-        "depurador": kw("debugger"), "var": kw("var"), "const": kw("var"), "mut": kw("var"),
-        "funcion": kw("function"), "capturar": kw("catch"),
-        "para": kw("for"), "elegir": kw("switch"), "caso": kw("case"), "porDefecto": kw("default"),
+        "si": kw("si"), "mientras": A, "con": A, "sino": B, "hacer": B, "intentar": B, "finalmente": B,
+        "retornar": D, "romper": D, "continuar": D, "crear": kw("crear"), "eliminar": C, "vacio": C, "lanzar": C,
+        "depurador": kw("depurador"), "var": kw("var"), "const": kw("var"), "mut": kw("var"),
+        "funcion": kw("funcion"), "capturar": kw("capturar"),
+        "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("porDefecto"),
         "en": operator, "tipoDe": operator, "instanciaDe": operator,
         "verdadero": atom, "falso": atom, "nulo": atom, "indefinido": atom, "NuN": atom, "Infinito": atom,
-        "ambiente": kw("this"), "clase": kw("class"), "super": kw("atom"),
-        "producir": C, "exportar": kw("export"), "importar": kw("import"), "extiende": C,
+        "ambiente": kw("ambiente"), "clase": kw("clase"), "super": kw("atom"),
+        "producir": C, "exportar": kw("exportar"), "importar": kw("importar"), "extiende": C,
         "esperar": C
       };
     }();
@@ -119,7 +119,7 @@
             return ret(kw.type, kw.style, word)
           }
           if (word == "asincrono" && stream.match(/^(\s|\/\*([^*]|\*(?!\/))*?\*\/)*[\[\(\w]/, false))
-            return ret("async", "keyword", word)
+            return ret("asincrono", "keyword", word)
         }
         return ret("variable", "variable", word)
       }
@@ -211,7 +211,7 @@
     // Parser
   
     var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true,
-                       "regexp": true, "this": true, "import": true, "jsonld-keyword": true};
+                       "regexp": true, "ambiente": true, "importar": true, "jsonld-keyword": true};
   
     function JSLexical(indented, column, type, align, prev, info) {
       this.indented = indented;
