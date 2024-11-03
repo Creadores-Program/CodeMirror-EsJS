@@ -21,8 +21,8 @@
       var operator = kw("operator"), atom = {type: "atom", style: "atom"};
   
       return {
-        "si": kw("si"), "mientras": A, "con": A, "sino": B, "hacer": B, "intentar": B, "finalmente": B,
-        "retornar": D, "romper": D, "continuar": D, "crear": kw("new"), "eliminar": C, "vacio": C, "lanzar": C,
+        "si": kw("si"), "mientras": A, "con": A, "sino": B, "osi": kw("si"), "hacer": B, "intentar": B, "finalmente": B,
+        "retornar": D, "romper": D, "continuar": D, "crear": kw("crear"), "eliminar": C, "vacio": C, "lanzar": C,
         "depurador": kw("depurador"), "var": kw("var"), "const": kw("var"), "mut": kw("var"),
         "funcion": kw("funcion"), "capturar": kw("capturar"),
         "para": kw("para"), "elegir": kw("elegir"), "caso": kw("caso"), "porDefecto": kw("porDefecto"),
