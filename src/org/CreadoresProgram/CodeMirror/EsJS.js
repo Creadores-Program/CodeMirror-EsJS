@@ -367,7 +367,7 @@
       if (type == "depuradora") return cont(expect(";"));
       if (type == "{") return cont(pushlex("}"), pushblockcontext, block, poplex, popcontext);
       if (type == ";") return cont();
-      if (type == "si") {
+      if (type == "si" || type == "osi") {
         if (cx.state.lexical.info == "sino" && cx.state.cc[cx.state.cc.length - 1] == poplex)
           cx.state.cc.pop()();
         return cont(pushlex("form"), parenExpr, statement, poplex, maybeelse);
@@ -891,7 +891,7 @@
         if (state.tokenize != tokenBase) return 0;
         var firstChar = textAfter && textAfter.charAt(0), lexical = state.lexical, top
         // Kludge to prevent 'maybelse' from blocking lexical scope pops
-        if (!/^\s*sino\b/.test(textAfter)) for (var i = state.cc.length - 1; i >= 0; --i) {
+        if (!/^\s*sino\b/.test(textAfter) || !/^\s*osi\b/.test(textAfter)) for (var i = state.cc.length - 1; i >= 0; --i) {
           var c = state.cc[i];
           if (c == poplex) lexical = lexical.prev;
           else if (c != maybeelse && c != popcontext) break;
